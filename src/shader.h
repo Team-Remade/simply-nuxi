@@ -9,6 +9,9 @@ public:
     // Program ID
     unsigned int ID;
 
+    // Default constructor
+    Shader() : ID(0) {}
+    
     // Constructor builds the shader from embedded source
     Shader(const char* vertexSource, const char* fragmentSource);
     

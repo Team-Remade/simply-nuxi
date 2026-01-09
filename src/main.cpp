@@ -31,27 +31,27 @@ class Frame : public wxFrame
 public:
     Frame(const wxString &title);
 private:
-    OpenGLCanvas* canvas{nullptr};
+    OpenGLCanvas *canvas{nullptr};
 };
 
 class OpenGLCanvas : public wxGLCanvas
 {
 public:
-    OpenGLCanvas(Frame* parent, const wxGLAttributes& canvasAttrs);
+    OpenGLCanvas(Frame *parent, const wxGLAttributes &canvasAttrs);
     ~OpenGLCanvas();
 
     bool InitGLFuctions();
     bool InitGL();
 
-    void OnPaint(wxPaintEvent& event);
-    void OnSize(wxSizeEvent& event);
+    void OnPaint(wxPaintEvent &event);
+    void OnSize(wxSizeEvent &event);
 
 private:
-    wxGLContext* openGLContext;
+    wxGLContext *openGLContext;
     bool isInitialized{false};
 
     unsigned int VAO, VBO;
-    Shader shader = Shader(vertex, fragment);
+    Shader shader;
 };
 
 wxIMPLEMENT_APP(App);
@@ -70,7 +70,7 @@ Frame::Frame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title, wxDefaul
 {
     wxGLAttributes canvasAttrs;
     canvasAttrs.PlatformDefaults().Defaults().EndList();
-    // After this line, the program crashes.
+    
     canvas = new OpenGLCanvas(this, canvasAttrs);
     canvas->SetMinSize(FromDIP(wxSize(640, 480)));
 }
@@ -120,6 +120,8 @@ bool OpenGLCanvas::InitGL()
         return false;
     
     SetCurrent(*openGLContext);
+
+    shader = Shader(vertex, fragment);
 
     float points[6] = {
         // left
