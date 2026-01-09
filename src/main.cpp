@@ -28,16 +28,16 @@ class OpenGLCanvas;
 
 class Frame : public wxFrame
 {
+public:
+    Frame(const wxString &title);
 private:
     OpenGLCanvas* canvas{nullptr};
-public:
-    Frame(const wxString& title);
 };
 
 class OpenGLCanvas : public wxGLCanvas
 {
 public:
-    OpenGLCanvas(Frame *parent, const wxGLAttributes& canvasAttrs);
+    OpenGLCanvas(Frame* parent, const wxGLAttributes& canvasAttrs);
     ~OpenGLCanvas();
 
     bool InitGLFuctions();
@@ -47,7 +47,7 @@ public:
     void OnSize(wxSizeEvent& event);
 
 private:
-    wxGLContext* openGLContext{nullptr};
+    wxGLContext* openGLContext;
     bool isInitialized{false};
 
     unsigned int VAO, VBO;
@@ -66,16 +66,16 @@ bool App::OnInit()
     return true;
 }
 
-Frame::Frame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxSize(640, 480))
+Frame::Frame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxDefaultSize)
 {
     wxGLAttributes canvasAttrs;
     canvasAttrs.PlatformDefaults().Defaults().EndList();
-
+    // After this line, the program crashes.
     canvas = new OpenGLCanvas(this, canvasAttrs);
     canvas->SetMinSize(FromDIP(wxSize(640, 480)));
 }
 
-OpenGLCanvas::OpenGLCanvas(Frame *parent, const wxGLAttributes& canvasAttrs) : wxGLCanvas(parent, canvasAttrs)
+OpenGLCanvas::OpenGLCanvas(Frame *parent, const wxGLAttributes &canvasAttrs) : wxGLCanvas(parent, canvasAttrs)
 {
     wxGLContextAttrs contextAttrs;
     contextAttrs.PlatformDefaults().CoreProfile().OGLVersion(4, 1).EndList();
@@ -192,4 +192,18 @@ void OpenGLCanvas::OnSize(wxSizeEvent& event)
     glViewport(0, 0, w, h);
 
     event.Skip();
+}
+
+int main()
+{
+    wxApp::SetInstance(new App());
+    wxEntryStart(0, nullptr);
+
+    wxApp::GetInstance()->OnInit();
+
+    
+
+    wxApp::GetInstance()->OnRun();
+
+    return 0;
 }
