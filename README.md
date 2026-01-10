@@ -21,6 +21,11 @@ Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
 scoop install main/xmake
 ```
 
+- Install cmake.
+```
+winget.exe install --id "Kitware.CMake" --exact --source winget --accept-source-agreements --disable-interactivity --version "3.31.8" --silent --accept-package-agreements --force
+```
+
 - Open MSYS2 terminal.
 ```bash
 pacman -S --needed base-devel mingw-w64-ucrt-x86_64-toolchain
