@@ -68,11 +68,28 @@ bool App::OnInit()
 
 Frame::Frame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxDefaultSize)
 {
+    auto sizer = new wxBoxSizer(wxVERTICAL);
+
     wxGLAttributes canvasAttrs;
     canvasAttrs.PlatformDefaults().Defaults().EndList();
     
     canvas = new OpenGLCanvas(this, canvasAttrs);
     canvas->SetMinSize(FromDIP(wxSize(640, 480)));
+    sizer->Add(canvas, 1, wxEXPAND);
+
+    auto bottomSizer = new wxBoxSizer(wxHORIZONTAL);
+    auto testButton = new wxButton(this, wxID_ANY, "Test");
+
+    bottomSizer->Add(testButton, 0, wxALL | wxALIGN_CENTER, FromDIP(15));
+    bottomSizer->AddStretchSpacer(1);
+
+    sizer->Add(bottomSizer, 0, wxEXPAND);
+
+    SetSizerAndFit(sizer);
+
+    testButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent &event) {
+        printf("Test button clicked\n");
+    });
 }
 
 OpenGLCanvas::OpenGLCanvas(Frame *parent, const wxGLAttributes &canvasAttrs) : wxGLCanvas(parent, canvasAttrs)
