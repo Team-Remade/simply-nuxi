@@ -3,6 +3,7 @@
 #include "timelinepanel.h"
 #include "scenetreepanel.h"
 #include "propertiespanel.h"
+#include "darksplitter.h"
 
 UIManager::UIManager(wxWindow* parent)
 {
@@ -17,15 +18,15 @@ UIManager::~UIManager()
 void UIManager::SetupLayout(wxWindow* parent)
 {
     // Create main horizontal splitter for left (Viewport/Timeline) and right (Scene Tree/Properties)
-    mainSplitter = new wxSplitterWindow(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_3D | wxSP_LIVE_UPDATE);
+    mainSplitter = new DarkSplitter(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_3D | wxSP_LIVE_UPDATE);
     mainSplitter->SetMinimumPaneSize(200);
 
     // Create left splitter for Viewport and Timeline
-    leftSplitter = new wxSplitterWindow(mainSplitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_3D | wxSP_LIVE_UPDATE);
+    leftSplitter = new DarkSplitter(mainSplitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_3D | wxSP_LIVE_UPDATE);
     leftSplitter->SetMinimumPaneSize(200);
 
     // Create right splitter for Scene Tree and Properties
-    rightSplitter = new wxSplitterWindow(mainSplitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_3D | wxSP_LIVE_UPDATE);
+    rightSplitter = new DarkSplitter(mainSplitter, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSP_3D | wxSP_LIVE_UPDATE);
     rightSplitter->SetMinimumPaneSize(100);
 
     // Create the panels

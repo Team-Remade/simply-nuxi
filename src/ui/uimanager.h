@@ -3,7 +3,7 @@
 #include <wx/wx.h>
 #include <wx/glcanvas.h>
 #include <wx/treectrl.h>
-#include <wx/splitter.h>
+#include "darksplitter.h"
 
 class OpenGLCanvas;
 class ViewportPanel;
@@ -22,9 +22,9 @@ public:
     wxTreeCtrl* GetSceneTree() const;
     
 private:
-    wxSplitterWindow* mainSplitter;
-    wxSplitterWindow* leftSplitter;
-    wxSplitterWindow* rightSplitter;
+    DarkSplitter* mainSplitter;
+    DarkSplitter* leftSplitter;
+    DarkSplitter* rightSplitter;
     
     ViewportPanel* viewportPanel;
     TimelinePanel* timelinePanel;
