@@ -15,4 +15,5 @@ namespace DarkTheme
 
     // Accent colors
     const wxColour Accent = wxColour(0, 120, 215);
+    const wxColour AccentDark = wxColour(0, 90, 180);
 }

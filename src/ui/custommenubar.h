@@ -23,6 +23,16 @@ public:
     // Bind an event handler to a menu item
     void BindMenuEvent(int id, std::function<void(wxCommandEvent&)> handler);
     
+    // Set the application title displayed in the title bar area
+    void SetAppTitle(const wxString& title) { appTitle = title; }
+    
+    // Add window control buttons (minimize, maximize, close)
+    void AddWindowControls();
+    
+    // Bind window control events
+    enum class ControlType { Minimize, Maximize, Close };
+    void BindControlEvent(ControlType type, std::function<void(wxCommandEvent&)> handler);
+    
     // Get the height of the menu bar for layout purposes
     int GetMenuBarHeight() const { return menuBarHeight; }
     
@@ -44,9 +54,25 @@ private:
         bool isOpen = false;
     };
     
+    enum class ControlButton { Minimize, Maximize, Restore, Close };
+    struct WindowControl
+    {
+        ControlButton button;
+        wxRect bounds;
+        std::function<void(wxCommandEvent&)> handler;
+        bool isHovered = false;
+        bool isPressed = false;
+    };
+    
     std::vector<Menu> menus;
+    std::vector<WindowControl> windowControls;
     int activeMenuIndex = -1;
-    int menuBarHeight = 30;
+    int menuBarHeight = 50;
+    int titleBarHeight = 30;
+    wxString appTitle;
+    bool isDragging = false;
+    wxPoint dragStartPos;
+    wxPoint frameStartPos;
     
     void OnPaint(wxPaintEvent& event);
     void OnMouseDown(wxMouseEvent& event);
@@ -56,7 +82,11 @@ private:
     void OnMenuItemClick(wxCommandEvent& event);
     
     void DrawMenuBar(wxDC& dc);
+    void DrawTitleBar(wxDC& dc);
+    void DrawWindowControls(wxDC& dc);
     void ShowMenuPopup(int menuIndex, const wxPoint& pos);
+    
+    wxWindow* parentFrame;
     
     class MenuPopup : public wxPopupWindow
     {

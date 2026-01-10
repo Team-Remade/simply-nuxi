@@ -46,14 +46,23 @@ bool App::OnInit()
     return true;
 }
 
-Frame::Frame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxDefaultSize)
+Frame::Frame(const wxString& title)
 {
+    // Create borderless frame without native titlebar
+    // Use wxFRAME_NO_TASKBAR to hide from taskbar, wxBORDER_NONE to remove border
+    Create(nullptr, wxID_ANY, title, wxDefaultPosition, wxDefaultSize, 
+           wxFRAME_NO_TASKBAR | wxBORDER_NONE | wxFRAME_SHAPED);
+    
     // Apply dark theme to the frame
     SetBackgroundColour(DarkTheme::Background);
     SetForegroundColour(DarkTheme::Text);
 
-    // Create custom menu bar
+    // Create custom title bar with integrated menu bar
     CustomMenuBar* customMenuBar = new CustomMenuBar(this);
+    customMenuBar->SetAppTitle("Mine Imator Simply Remade: Nuxi");
+    
+    // Add window control buttons (minimize, maximize, close)
+    customMenuBar->AddWindowControls();
     
     // Add File menu
     customMenuBar->AddMenu("File");
@@ -67,11 +76,11 @@ Frame::Frame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title, wxDefaul
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
     
     // Add custom menu bar to sizer
-    mainSizer->Add(customMenuBar, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, FromDIP(5));
+    mainSizer->Add(customMenuBar, 0, wxEXPAND | wxLEFT | wxRIGHT, FromDIP(0));
     
     // Initialize UI Manager
     uiManager = new UIManager(this);
-      
+       
     // Add UI to main sizer
     mainSizer->Add(uiManager->GetMainWindow(), 1, wxEXPAND | wxALL, FromDIP(5));
 
@@ -79,6 +88,22 @@ Frame::Frame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title, wxDefaul
 
     // Bind menu events to custom menu bar
     customMenuBar->BindMenuEvent(wxID_EXIT, [this](wxCommandEvent &event) {
+        Close(true);
+    });
+    
+    // Bind window control events
+    customMenuBar->BindControlEvent(CustomMenuBar::ControlType::Minimize, [this](wxCommandEvent &event) {
+        Iconize(true);
+    });
+    
+    customMenuBar->BindControlEvent(CustomMenuBar::ControlType::Maximize, [this](wxCommandEvent &event) {
+        if (IsMaximized())
+            Maximize(false);
+        else
+            Maximize(true);
+    });
+    
+    customMenuBar->BindControlEvent(CustomMenuBar::ControlType::Close, [this](wxCommandEvent &event) {
         Close(true);
     });
 }
