@@ -4,6 +4,8 @@
 #include "shader.h"
 #include "ui/uimanager.h"
 #include "openglcanvas.h"
+#include "ui/darktheme.h"
+#include "ui/custommenubar.h"
 
 extern const char fragment[] = {
     #include "fragment.glsl.h"
@@ -46,35 +48,38 @@ bool App::OnInit()
 
 Frame::Frame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxDefaultSize)
 {
-    // Create MenuBar
-    wxMenuBar *menuBar = new wxMenuBar();
-    wxMenu *fileMenu = new wxMenu();
-    fileMenu->Append(wxID_NEW, "New\tCtrl+N");
-    fileMenu->Append(wxID_OPEN, "Open\tCtrl+O");
-    fileMenu->Append(wxID_SAVE, "Save\tCtrl+S");
-    fileMenu->AppendSeparator();
-    fileMenu->Append(wxID_EXIT, "Exit");
-    menuBar->Append(fileMenu, "File");
-    SetMenuBar(menuBar);
+    // Apply dark theme to the frame
+    SetBackgroundColour(DarkTheme::Background);
+    SetForegroundColour(DarkTheme::Text);
+
+    // Create custom menu bar
+    CustomMenuBar* customMenuBar = new CustomMenuBar(this);
+    
+    // Add File menu
+    customMenuBar->AddMenu("File");
+    customMenuBar->AddMenuItem("New", wxID_NEW, "Ctrl+N");
+    customMenuBar->AddMenuItem("Open", wxID_OPEN, "Ctrl+O");
+    customMenuBar->AddMenuItem("Save", wxID_SAVE, "Ctrl+S");
+    customMenuBar->AddSeparator();
+    customMenuBar->AddMenuItem("Exit", wxID_EXIT);
 
     // Create main sizer
     auto mainSizer = new wxBoxSizer(wxVERTICAL);
-
+    
+    // Add custom menu bar to sizer
+    mainSizer->Add(customMenuBar, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, FromDIP(5));
+    
     // Initialize UI Manager
     uiManager = new UIManager(this);
-    
+      
     // Add UI to main sizer
     mainSizer->Add(uiManager->GetMainWindow(), 1, wxEXPAND | wxALL, FromDIP(5));
 
     SetSizerAndFit(mainSizer);
 
-    // Bind events
-    Bind(wxEVT_MENU, [this](wxCommandEvent &event) {
-        switch (event.GetId()) {
-            case wxID_EXIT:
-                Close(true);
-                break;
-        }
+    // Bind menu events to custom menu bar
+    customMenuBar->BindMenuEvent(wxID_EXIT, [this](wxCommandEvent &event) {
+        Close(true);
     });
 }
 

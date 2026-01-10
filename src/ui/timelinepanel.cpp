@@ -1,11 +1,15 @@
 #include "timelinepanel.h"
+#include "darktheme.h"
 
 TimelinePanel::TimelinePanel(wxWindow* parent)
 {
     panel = new wxPanel(parent, wxID_ANY);
-    panel->SetBackgroundColour(wxColour(50, 50, 50));
+    panel->SetBackgroundColour(DarkTheme::PanelBackground);
+    panel->SetForegroundColour(DarkTheme::Text);
     auto timelineSizer = new wxBoxSizer(wxVERTICAL);
-    timelineSizer->Add(new wxStaticText(panel, wxID_ANY, "Timeline"), 0, wxALL, 5);
+    wxStaticText* timelineLabel = new wxStaticText(panel, wxID_ANY, "Timeline");
+    timelineLabel->SetForegroundColour(DarkTheme::Text);
+    timelineSizer->Add(timelineLabel, 0, wxALL, 5);
     panel->SetSizer(timelineSizer);
 }
 

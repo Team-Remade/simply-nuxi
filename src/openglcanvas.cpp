@@ -1,4 +1,5 @@
 #include "openglcanvas.h"
+#include "ui/darktheme.h"
 
 extern const char fragment[];
 extern const char vertex[];
@@ -94,7 +95,10 @@ void OpenGLCanvas::OnPaint(wxPaintEvent& event)
     if (!openGLContext->SetCurrent(*this))
         return;
 
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+    glClearColor(DarkTheme::OpenGLBackground.GetRed() / 255.0f,
+                 DarkTheme::OpenGLBackground.GetGreen() / 255.0f,
+                 DarkTheme::OpenGLBackground.GetBlue() / 255.0f,
+                 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
     shader.use();
