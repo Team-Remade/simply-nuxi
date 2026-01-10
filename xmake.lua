@@ -9,6 +9,7 @@ set_optimize("smallest")
 target("simply-remade-nuxi")
     set_kind("binary")
     add_files("src/*.cpp")
+    add_files("src/ui/*.cpp")
     set_languages("c++14")
     add_packages("opengl32", "glew", "wxwidgets")
 

@@ -1,9 +1,9 @@
 #include <wx/wx.h>
-#include <GL/glew.h>
-#include <wx/glcanvas.h>
 #include <stdio.h>
 
 #include "shader.h"
+#include "ui/uimanager.h"
+#include "openglcanvas.h"
 
 extern const char fragment[] = {
     #include "fragment.glsl.h"
@@ -21,37 +21,15 @@ class App : public wxApp
 {
 public:
     App(/* args */) {}
-    bool OnInit() wxOVERRIDE;  
+    bool OnInit() wxOVERRIDE;
 };
-
-class OpenGLCanvas;
 
 class Frame : public wxFrame
 {
 public:
     Frame(const wxString &title);
 private:
-    OpenGLCanvas *canvas{nullptr};
-};
-
-class OpenGLCanvas : public wxGLCanvas
-{
-public:
-    OpenGLCanvas(Frame *parent, const wxGLAttributes &canvasAttrs);
-    ~OpenGLCanvas();
-
-    bool InitGLFuctions();
-    bool InitGL();
-
-    void OnPaint(wxPaintEvent &event);
-    void OnSize(wxSizeEvent &event);
-
-private:
-    wxGLContext *openGLContext;
-    bool isInitialized{false};
-
-    unsigned int VAO, VBO;
-    Shader shader;
+    UIManager* uiManager{nullptr};
 };
 
 wxIMPLEMENT_APP(App);
@@ -68,150 +46,38 @@ bool App::OnInit()
 
 Frame::Frame(const wxString& title) : wxFrame(nullptr, wxID_ANY, title, wxDefaultPosition, wxDefaultSize)
 {
-    auto sizer = new wxBoxSizer(wxVERTICAL);
+    // Create MenuBar
+    wxMenuBar *menuBar = new wxMenuBar();
+    wxMenu *fileMenu = new wxMenu();
+    fileMenu->Append(wxID_NEW, "New\tCtrl+N");
+    fileMenu->Append(wxID_OPEN, "Open\tCtrl+O");
+    fileMenu->Append(wxID_SAVE, "Save\tCtrl+S");
+    fileMenu->AppendSeparator();
+    fileMenu->Append(wxID_EXIT, "Exit");
+    menuBar->Append(fileMenu, "File");
+    SetMenuBar(menuBar);
 
-    wxGLAttributes canvasAttrs;
-    canvasAttrs.PlatformDefaults().Defaults().EndList();
+    // Create main sizer
+    auto mainSizer = new wxBoxSizer(wxVERTICAL);
+
+    // Initialize UI Manager
+    uiManager = new UIManager(this);
     
-    canvas = new OpenGLCanvas(this, canvasAttrs);
-    canvas->SetMinSize(FromDIP(wxSize(640, 480)));
-    sizer->Add(canvas, 1, wxEXPAND);
+    // Add UI to main sizer
+    mainSizer->Add(uiManager->GetMainWindow(), 1, wxEXPAND | wxALL, FromDIP(5));
 
-    auto bottomSizer = new wxBoxSizer(wxHORIZONTAL);
-    auto testButton = new wxButton(this, wxID_ANY, "Test");
+    SetSizerAndFit(mainSizer);
 
-    bottomSizer->Add(testButton, 0, wxALL | wxALIGN_CENTER, FromDIP(15));
-    bottomSizer->AddStretchSpacer(1);
-
-    sizer->Add(bottomSizer, 0, wxEXPAND);
-
-    SetSizerAndFit(sizer);
-
-    testButton->Bind(wxEVT_BUTTON, [this](wxCommandEvent &event) {
-        printf("Test button clicked\n");
+    // Bind events
+    Bind(wxEVT_MENU, [this](wxCommandEvent &event) {
+        switch (event.GetId()) {
+            case wxID_EXIT:
+                Close(true);
+                break;
+        }
     });
 }
 
-OpenGLCanvas::OpenGLCanvas(Frame *parent, const wxGLAttributes &canvasAttrs) : wxGLCanvas(parent, canvasAttrs)
-{
-    wxGLContextAttrs contextAttrs;
-    contextAttrs.PlatformDefaults().CoreProfile().OGLVersion(4, 1).EndList();
-    openGLContext = new wxGLContext(this, nullptr, &contextAttrs);
-
-    if (!openGLContext->IsOK())
-    {
-        wxMessageBox("A compatible driver was not found. You need OpenGL 4.1 or higher.", "OpenGL version error", wxOK | wxICON_ERROR, this);
-        delete openGLContext;
-        openGLContext = nullptr;
-    }
-    
-
-    Bind(wxEVT_PAINT, &OpenGLCanvas::OnPaint, this);
-    Bind(wxEVT_SIZE, &OpenGLCanvas::OnSize, this);
-}
-
-OpenGLCanvas::~OpenGLCanvas()
-{
-    delete openGLContext;
-}
-
-bool OpenGLCanvas::InitGLFuctions()
-{
-    if (!isInitialized)
-    {
-        if (!openGLContext->SetCurrent(*this))
-            return false;
-
-        if (glewInit() != GLEW_OK)
-            return false;
-
-        isInitialized = true;
-    }
-
-    return true;
-}
-
-bool OpenGLCanvas::InitGL()
-{
-    if (!InitGLFuctions())
-        return false;
-    
-    SetCurrent(*openGLContext);
-
-    shader = Shader(vertex, fragment);
-
-    float points[6] = {
-        // left
-        -0.8f, -0.5f,
-
-        // top
-        0.0f, 0.5f,
-
-        // right
-        0.8f, -0.5f
-    };
-
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-
-    return true;
-}
-
-void OpenGLCanvas::OnPaint(wxPaintEvent& event)
-{
-    if (!isInitialized)
-        return;
-
-    wxPaintDC(this);
-
-    if (!openGLContext->SetCurrent(*this))
-        return;
-
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    shader.use();
-    glBindVertexArray(VAO);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-
-    glFlush();
-    SwapBuffers();
-}
-
-void OpenGLCanvas::OnSize(wxSizeEvent& event)
-{
-    bool firstAppearance = IsShownOnScreen() && !isInitialized;
-
-    if (firstAppearance)
-    {
-        if (!InitGL())
-            return;
-
-        isInitialized = true;
-    }
-
-    if (!isInitialized)
-        return;
-    
-    wxSize size = event.GetSize() * GetContentScaleFactor();
-    int w, h;
-    GetClientSize(&w, &h);
-
-    glViewport(0, 0, w, h);
-
-    event.Skip();
-}
 
 int main()
 {
