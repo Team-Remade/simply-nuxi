@@ -1,5 +1,17 @@
 #include "custommenubar.h"
 #include "darktheme.h"
+#include <wx/mstream.h>
+
+// Include the embedded icons from bin2c generated headers
+extern const unsigned char appIcon01_png[] = {
+    #include "appIcon01.png.h"
+};
+extern const unsigned int appIcon01_png_size = sizeof(appIcon01_png);
+
+extern const unsigned char chegg_png[] = {
+    #include "chegg.png.h"
+};
+extern const unsigned int chegg_png_size = sizeof(chegg_png);
 
 wxBEGIN_EVENT_TABLE(CustomMenuBar, wxPanel)
     EVT_PAINT(CustomMenuBar::OnPaint)
@@ -304,6 +316,41 @@ void CustomMenuBar::OnPaint(wxPaintEvent& event)
     // Menu dropdowns are handled by popup windows, no need to draw here
 }
 
+void CustomMenuBar::SetAppIcon()
+{
+    // 1 in 1000 chance to use chegg.png, otherwise use appIcon01.png
+    const unsigned char* iconData;
+    unsigned int iconSize;
+    
+    // Use current time in milliseconds for randomness
+    wxLongLong ms = wxGetUTCTimeMillis();
+    if (ms % 1000 == 0)
+    {
+        iconData = chegg_png;
+        iconSize = chegg_png_size;
+    }
+    else
+    {
+        iconData = appIcon01_png;
+        iconSize = appIcon01_png_size;
+    }
+    
+    // Load the embedded PNG image
+    wxMemoryInputStream memStream(iconData, iconSize);
+    wxImage image(memStream, wxBITMAP_TYPE_PNG);
+    
+    if (image.IsOk())
+    {
+        // Scale the icon to a reasonable size for the title bar (16x16 or 20x20)
+        int iconSize = 16;
+        if (image.GetWidth() > iconSize || image.GetHeight() > iconSize)
+        {
+            image.Rescale(iconSize, iconSize, wxIMAGE_QUALITY_HIGH);
+        }
+        appIcon = wxBitmap(image);
+    }
+}
+
 void CustomMenuBar::DrawTitleBar(wxDC& dc)
 {
     int width, height;
@@ -314,13 +361,33 @@ void CustomMenuBar::DrawTitleBar(wxDC& dc)
     dc.SetPen(*wxTRANSPARENT_PEN);
     dc.DrawRectangle(0, 0, width, titleBarHeight);
     
-    // Draw title text
-    if (!appTitle.IsEmpty())
+    // Draw app icon if available
+    if (appIcon.IsOk())
     {
-        dc.SetFont(wxFont(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
-        dc.SetTextForeground(DarkTheme::Text);
-        wxSize textSize = dc.GetTextExtent(appTitle);
-        dc.DrawText(appTitle, 10, (titleBarHeight - textSize.GetHeight()) / 2);
+        int iconX = 10;
+        int iconY = (titleBarHeight - appIcon.GetHeight()) / 2;
+        dc.DrawBitmap(appIcon, iconX, iconY, true);
+        
+        // Draw title text to the right of the icon
+        if (!appTitle.IsEmpty())
+        {
+            dc.SetFont(wxFont(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
+            dc.SetTextForeground(DarkTheme::Text);
+            wxSize textSize = dc.GetTextExtent(appTitle);
+            int textX = iconX + appIcon.GetWidth() + 8;
+            dc.DrawText(appTitle, textX, (titleBarHeight - textSize.GetHeight()) / 2);
+        }
+    }
+    else
+    {
+        // Draw title text (original behavior without icon)
+        if (!appTitle.IsEmpty())
+        {
+            dc.SetFont(wxFont(10, wxFONTFAMILY_DEFAULT, wxFONTSTYLE_NORMAL, wxFONTWEIGHT_BOLD));
+            dc.SetTextForeground(DarkTheme::Text);
+            wxSize textSize = dc.GetTextExtent(appTitle);
+            dc.DrawText(appTitle, 10, (titleBarHeight - textSize.GetHeight()) / 2);
+        }
     }
 }
 

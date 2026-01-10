@@ -9,11 +9,12 @@ target("simply-remade-nuxi")
     set_kind("binary")
     add_files("src/*.cpp")
     add_files("src/ui/*.cpp")
+    add_files("src/resources.rc")
     set_languages("c++14")
     add_packages("opengl32", "glew")
 
-    add_rules("utils.bin2c", {extensions = {".glsl"}})
-    add_files("assets/shaders/*.glsl")
+    add_rules("utils.bin2c", {extensions = {".glsl", ".png"}})
+    add_files("assets/shaders/*.glsl", "assets/*.png")
 
 -- Pre-build script to download and build wxwidgets
 before_build(function (target)

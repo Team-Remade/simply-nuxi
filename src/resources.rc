@@ -1,0 +1,4 @@
+// Icon resource file for the executable
+// This sets the icon displayed in Windows Explorer and taskbar
+
+1 ICON "assets/appIcon01.ico"

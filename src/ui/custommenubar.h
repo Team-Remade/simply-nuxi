@@ -3,8 +3,13 @@
 #include <wx/wx.h>
 #include <wx/panel.h>
 #include <wx/popupwin.h>
+#include <wx/image.h>
 #include <vector>
 #include <functional>
+
+// App icon embedded from bin2c generated header
+extern const unsigned char appIcon01_png[];
+extern const unsigned int appIcon01_png_size;
 
 class CustomMenuBar : public wxPanel
 {
@@ -22,6 +27,9 @@ public:
     
     // Bind an event handler to a menu item
     void BindMenuEvent(int id, std::function<void(wxCommandEvent&)> handler);
+    
+    // Set the application icon displayed in the title bar
+    void SetAppIcon();
     
     // Set the application title displayed in the title bar area
     void SetAppTitle(const wxString& title) { appTitle = title; }
@@ -70,6 +78,7 @@ private:
     int menuBarHeight = 50;
     int titleBarHeight = 30;
     wxString appTitle;
+    wxBitmap appIcon;
     bool isDragging = false;
     wxPoint dragStartPos;
     wxPoint frameStartPos;

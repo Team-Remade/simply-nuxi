@@ -41,6 +41,9 @@ bool App::OnInit()
     if (!wxApp::OnInit())
         return false;
 
+    // Initialize image handlers (including PNG)
+    wxInitAllImageHandlers();
+
     Frame* frame = new Frame("Mine Imator Simply Remade: Nuxi");
     frame->Show(true);
     return true;
@@ -59,6 +62,7 @@ Frame::Frame(const wxString& title)
 
     // Create custom title bar with integrated menu bar
     CustomMenuBar* customMenuBar = new CustomMenuBar(this);
+    customMenuBar->SetAppIcon();
     customMenuBar->SetAppTitle("Mine Imator Simply Remade: Nuxi");
     
     // Add window control buttons (minimize, maximize, close)
