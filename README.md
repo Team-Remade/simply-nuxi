@@ -47,3 +47,5 @@ gdb --version
 xmake
 xmake run
 ```
+
+If you get `assertion failed: ` during the build process, run `xmake` again.
